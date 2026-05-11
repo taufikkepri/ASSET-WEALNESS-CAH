@@ -146,7 +146,8 @@ if sel_sub != "Semua":
 if sel_wellness:
     df = df[df["wellness"].isin(sel_wellness)]
 
-metrics = summary_metrics(df_master)  # always show full metrics at top
+metrics_all = summary_metrics(df_master)  # KPI cards always full data
+metrics = summary_metrics(df) if (sel_sub != 'Semua' or len(sel_wellness) < 3) else metrics_all
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -184,12 +185,13 @@ if page == "📊 Overview":
 
     # ── Row 2: Donut + Bar subsistem ──────────────────────────────────────────
     col_left, col_right = st.columns([1, 2])
+    color_map = {"Hijau": "#2D7D32", "Kuning": "#F9A825", "Merah": "#C62828"}
+    df_ov = df.copy()  # pakai df yang sudah difilter
 
     with col_left:
         st.markdown('<div class="section-title">Distribusi Wellness</div>', unsafe_allow_html=True)
-        wcount = df_master["wellness"].value_counts().reset_index()
+        wcount = df_ov["wellness"].value_counts().reset_index()
         wcount.columns = ["Wellness", "Jumlah"]
-        color_map = {"Hijau": "#2D7D32", "Kuning": "#F9A825", "Merah": "#C62828"}
         fig_donut = px.pie(
             wcount, names="Wellness", values="Jumlah",
             color="Wellness", color_discrete_map=color_map,
@@ -205,7 +207,7 @@ if page == "📊 Overview":
 
     with col_right:
         st.markdown('<div class="section-title">Wellness per Subsistem</div>', unsafe_allow_html=True)
-        sub_count = df_master.groupby(["subsistem", "wellness"]).size().reset_index(name="n")
+        sub_count = df_ov.groupby(["subsistem", "wellness"]).size().reset_index(name="n")
         fig_bar = px.bar(
             sub_count, x="subsistem", y="n", color="wellness",
             color_discrete_map=color_map,
@@ -226,7 +228,7 @@ if page == "📊 Overview":
     with col_tbl:
         st.markdown('<div class="section-title">Aset Perlu Perhatian (Kuning & Merah)</div>',
                     unsafe_allow_html=True)
-        df_warn = df_master[df_master["wellness"].isin(["Kuning", "Merah"])].copy()
+        df_warn = df_ov[df_ov["wellness"].isin(["Kuning", "Merah"])].copy()
         df_warn = df_warn.sort_values("wellness_rank")
         show_cols = ["asset_id", "deskripsi", "subsistem", "wellness",
                      "wellness_score", "kondisi", "wo_no", "wo_pic"]
@@ -239,7 +241,7 @@ if page == "📊 Overview":
             return colors.get(val, "")
 
         if not df_warn.empty:
-            styled = df_warn[show_cols].style.applymap(
+            styled = df_warn[show_cols].style.map(
                 highlight_wellness, subset=["wellness"]
             )
             st.dataframe(styled, use_container_width=True, height=220)
@@ -358,7 +360,7 @@ elif page == "🔧 Detail Aset":
              "Merah": "background-color:#FFEBEE;color:#C62828"}
         return m.get(val, "")
 
-    styled_tbl = df_disp.style.applymap(color_wellness_col, subset=["Wellness"])
+    styled_tbl = df_disp.style.map(color_wellness_col, subset=["Wellness"])
     st.dataframe(styled_tbl, use_container_width=True, height=380)
 
     # Download button
