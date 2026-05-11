@@ -470,14 +470,19 @@ elif page == "📈 Tren Mingguan":
                                            values="jumlah", aggfunc="sum").reset_index()
             df_pivot = df_pivot.fillna(0)
             fig_area = go.Figure()
+            # Peta warna hex ke rgba untuk fill transparan
+            rgba_map = {
+                "MERAH":  "rgba(198,40,40,0.25)",
+                "KUNING": "rgba(249,168,37,0.25)",
+                "HIJAU":  "rgba(45,125,50,0.25)",
+            }
             for status, color in [("MERAH","#C62828"),("KUNING","#F9A825"),("HIJAU","#2D7D32")]:
                 if status in df_pivot.columns:
                     fig_area.add_trace(go.Scatter(
                         x=df_pivot["minggu"], y=df_pivot[status],
                         name=status, fill="tonexty",
                         mode="lines", line=dict(color=color, width=1.5),
-                        fillcolor=color.replace(")", ",0.35)").replace("rgb","rgba") if "rgb" in color
-                                 else color + "59",
+                        fillcolor=rgba_map[status],
                     ))
             fig_area.update_layout(
                 height=300, margin=dict(t=10, b=10, l=10, r=10),
