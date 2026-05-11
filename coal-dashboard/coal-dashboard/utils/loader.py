@@ -150,13 +150,13 @@ def summary_metrics(df: pd.DataFrame) -> dict:
     hijau   = (df["wellness"] == "Hijau").sum()
     kuning  = (df["wellness"] == "Kuning").sum()
     merah   = (df["wellness"] == "Merah").sum()
-    avg_score = df["wellness_score"].mean()
-    wo_open = df["wo_no"].notna().sum()
+    avg_score = df["wellness_score"].mean() if total > 0 else 0
+    wo_open = df["wo_no"].notna().sum() if total > 0 else 0
     return {
         "total": int(total),
         "hijau": int(hijau),
         "kuning": int(kuning),
         "merah": int(merah),
-        "avg_score": round(float(avg_score), 1),
+        "avg_score": round(float(avg_score) if str(avg_score) != "nan" else 0.0, 1),
         "wo_open": int(wo_open),
     }
