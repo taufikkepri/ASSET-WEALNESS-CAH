@@ -165,7 +165,7 @@ if page == "📊 Overview":
     c1, c2, c3, c4, c5, c6 = st.columns(6)
     kpis = [
         (c1, "Total Aset",     metrics["total"],       "#1F4E79", "unit"),
-        (c2, "Status Hijau",   metrics["hijau"],        "#2D7D32", f"{metrics['hijau']/metrics['total']*100:.0f}% dari total"),
+        (c2, "Status Hijau",   metrics["hijau"],        "#2D7D32", f"{metrics['hijau']/metrics['total']*100:.0f}% dari total" if metrics['total'] > 0 else "0% dari total"),
         (c3, "Status Kuning",  metrics["kuning"],       "#F57F17", "Perlu perhatian"),
         (c4, "Status Merah",   metrics["merah"],        "#C62828", "Kritis"),
         (c5, "Avg Wellness",   f"{metrics['avg_score']}",  "#1F4E79", "Skor 0–100"),
